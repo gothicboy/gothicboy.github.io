@@ -66,6 +66,63 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-爬虫解析动态内容" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/09/25/爬虫解析动态内容/" class="article-date">
+  <time datetime="2018-09-25T02:41:09.000Z" itemprop="datePublished">2018-09-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/25/爬虫解析动态内容/">&#39;爬虫解析动态内容&#39;</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="解析动态内容"><a href="#解析动态内容" class="headerlink" title="解析动态内容"></a>解析动态内容</h2><p>作者：卓越杨</p>
+<p>​    根据权威机构发布的全球互联网可访问性审计报告，全球约有四分之三的网站其内容或部分内容是通过JavaScript动态生成的，这就意味着在浏览器窗口中“查看网页源代码”时无法在HTML代码中找到这些内容，也就是说我们之前用的抓取数据的方式无法正常运转了。解决这样的问题基本上有两种方案，一是JavaScript逆向工程；另一种是渲染JavaScript获得渲染后的内容。</p>
+<h3 id="JavaScript逆向工程"><a href="#JavaScript逆向工程" class="headerlink" title="JavaScript逆向工程"></a>JavaScript逆向工程</h3><p>下面我们以“360图片”网站为例，说明什么是JavaScript逆向工程。其实所谓的JavaScript逆向工程就是找到通过Ajax技术动态获取数据的接口。在浏览器中输入<a href="http://image.so.com/z?ch=beauty" target="_blank" rel="noopener">http://image.so.com/z?ch=beauty</a>就可以打开“360图片”的“美女”版块，如下图所示。</p>
+<p><a href="https://github.com/jackfrued/Python-100-Days/blob/master/Day66-75/res/image360-website.png" target="_blank" rel="noopener"><img src="https://github.com/jackfrued/Python-100-Days/raw/master/Day66-75/res/image360-website.png" alt="img"></a></p>
+<p>但是当我们在浏览器中通过右键菜单“显示网页源代码”的时候，居然惊奇的发现页面的HTML代码中连一个<code>&lt;img&gt;</code>标签都没有，那么我们看到的图片是怎么显示出来的呢？原来所有的图片都是通过JavaScript动态加载的，而在浏览器的“开发人员工具”的“网络”中可以找到获取这些图片数据的网络API接口，如下图所示。</p>
+<p><a href="https://github.com/jackfrued/Python-100-Days/blob/master/Day66-75/res/api-image360.png" target="_blank" rel="noopener"><img src="https://github.com/jackfrued/Python-100-Days/raw/master/Day66-75/res/api-image360.png" alt="img"></a></p>
+<p>那么结论就很简单了，只要我们找到了这些网络API接口，那么就能通过这些接口获取到数据，当然实际开发的时候可能还要对这些接口的参数以及接口返回的数据进行分析，了解每个参数的意义以及返回的JSON数据的格式，这样才能在我们的爬虫中使用这些数据。</p>
+<p>关于如何从网络API中获取JSON格式的数据并提取出我们需要的内容，在之前的<a href="https://github.com/jackfrued/Python-100-Days/blob/master/Day01-15/Day11/%E6%96%87%E4%BB%B6%E5%92%8C%E5%BC%82%E5%B8%B8.md" target="_blank" rel="noopener">《文件和异常》</a>一文中已经讲解过了，这里不再进行赘述。</p>
+<h3 id="使用Selenium"><a href="#使用Selenium" class="headerlink" title="使用Selenium"></a>使用Selenium</h3><p>尽管很多网站对自己的网络API接口进行了保护，增加了获取数据的难度，但是只要经过足够的努力，绝大多数还是可以被逆向工程的，但是在实际开发中，我们可以通过浏览器渲染引擎来避免这些繁琐的工作，WebKit就是一个利用的渲染引擎。</p>
+<p>WebKit的代码始于1998年的KHTML项目，当时它是Konqueror浏览器的渲染引擎。2001年，苹果公司从这个项目的代码中衍生出了WebKit并应用于Safari浏览器，早期的Chrome浏览器也使用了该内核。在Python中，我们可以通过Qt框架获得WebKit引擎并使用它来渲染页面获得动态内容，关于这个内容请大家自行阅读<a href="http://python.jobbole.com/84600/" target="_blank" rel="noopener">《爬虫技术:动态页面抓取超级指南》</a>一文。</p>
+<p>如果没有打算用上面所说的方式来渲染页面并获得动态内容，其实还有一种替代方案就是使用自动化测试工具Selenium，它提供了浏览器自动化的API接口，这样就可以通过操控浏览器来获取动态内容。首先可以使用pip来安装Selenium。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip3 install selenium</span><br></pre></td></tr></table></figure>
+<p>下面以“阿里V任务”的“直播服务”为例，来演示如何使用Selenium获取到动态内容并抓取主播图片。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line"></span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    resp = requests.get(&apos;https://v.taobao.com/v/content/live?catetype=704&amp;from=taonvlang&apos;)</span><br><span class="line">    soup = BeautifulSoup(resp.text, &apos;lxml&apos;)</span><br><span class="line">    for img_tag in soup.select(&apos;img[src]&apos;):</span><br><span class="line">        print(img_tag.attrs[&apos;src&apos;])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>运行上面的程序会发现没有任何的输出，因为页面的HTML代码上根本找不到<code>&lt;img&gt;</code>标签。接下来我们使用Selenium来获取到页面上的动态内容，再提取主播图片。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">from bs4 import BeautifulSoup</span><br><span class="line">from selenium import webdriver</span><br><span class="line">from selenium.webdriver.common.keys import Keys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    driver = webdriver.Chrome()</span><br><span class="line">    driver.get(&apos;https://v.taobao.com/v/content/live?catetype=704&amp;from=taonvlang&apos;)</span><br><span class="line">    soup = BeautifulSoup(driver.page_source, &apos;lxml&apos;)</span><br><span class="line">    for img_tag in soup.body.select(&apos;img[src]&apos;):</span><br><span class="line">        print(img_tag.attrs[&apos;src&apos;])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>在上面的程序中，我们通过Selenium实现对Chrome浏览器的操控，如果要操控其他的浏览器，可以创对应的浏览器对象，例如Firefox、IE等。运行上面的程序，如果看到如下所示的错误提示，那是说明我们还没有将Chrome浏览器的驱动添加到PATH环境变量中，也没有在程序中指定Chrome浏览器驱动所在的位置。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">selenium.common.exceptions.WebDriverException: Message: &apos;chromedriver&apos; executable needs to be in PATH. Please see https://sites.google.com/a/chromium.org/chromedriver/home</span><br></pre></td></tr></table></figure>
+<p>为了解决上面的问题，可以到Selenium的<a href="https://github.com/jackfrued/Python-100-Days/blob/master/Day66-75" target="_blank" rel="noopener">官方网站</a>找到浏览器驱动的下载链接并下载需要的驱动，在Linux或macOS系统下可以通过下面的命令来设置PATH环境变量，Windows下配置环境变量也非常简单，不清楚的可以自行了解。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ export PATH=$PATH:/Users/Hao/Downloads/Tools/chromedriver/</span><br></pre></td></tr></table></figure>
+<p>其中<code>/Users/Hao/Downloads/Tools/chromedriver/</code>就是chromedriver所在的路径。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/09/25/爬虫解析动态内容/" data-id="cjmh4bgb6000354veykonklbn" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-反爬策略及应对方案" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/09/16/反爬策略及应对方案/" class="article-date">
@@ -154,7 +211,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/09/16/反爬策略及应对方案/" data-id="cjm5nm6o40002lwvekzvzow61" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/09/16/反爬策略及应对方案/" data-id="cjmh4bgb0000254vexi7ab33q" class="article-share-link">Share</a>
       
       
     </footer>
@@ -245,7 +302,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/09/13/python惯例/" data-id="cjm5nm6ny0001lwvej7pbtckw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/09/13/python惯例/" data-id="cjmh4bgau000154vedd0iu516" class="article-share-link">Share</a>
       
       
     </footer>
@@ -290,7 +347,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/09/10/hello-world/" data-id="cjm5nm6nn0000lwveakzgqyp3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/09/10/hello-world/" data-id="cjmh4bgaj000054vecqbzqyp9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -329,6 +386,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2018/09/25/爬虫解析动态内容/">&#39;爬虫解析动态内容&#39;</a>
+          </li>
         
           <li>
             <a href="/2018/09/16/反爬策略及应对方案/">反爬策略及应对方案</a>
